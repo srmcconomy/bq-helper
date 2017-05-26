@@ -39,9 +39,7 @@ module.exports = {
     // match the output path
 
     publicPath: '/',
-    stats: {
-      colors: true,
-    },
+    stats: 'minimal',
     // match the output `publicPath`
   },
 

@@ -8,6 +8,7 @@ module.exports = {
   build: {
     babel: {
       presets: ['env', 'react'],
+      plugins: ['transform-class-properties', 'transform-object-rest-spread'],
     },
     sass: {
       style: 'compact',
@@ -25,7 +26,7 @@ module.exports = {
       outFile: 'bundle.js'
     },
     server: {
-      src: './src/server.jsx',
+      src: './src/**/**/*.js?(x)',
       out: 'build'
     },
     css: {

@@ -13,9 +13,11 @@ const path = require('path');
 const pretty = require('prettysize');
 const fs = require('fs');
 const del = require('del');
+const eslint = require('gulp-eslint');
 
 const config = require('./config');
 const webpackConfig = require('./webpack.config');
+
 const webpackCompiler = webpack(webpackConfig);
 
 let isRunningDevServer = false;
@@ -171,21 +173,20 @@ gulp.task('build:prod', callback => {
   ], callback);
 });
 
-gulp.task('watch', ['clean'], callback => {
+gulp.task('watch', ['clean'], () => {
   runSequence(
-    // [
-    //   'build:lint:js',
-    //   'build:flow',
-    //   'build:lint:css',
-    // ], [
+    [
+      'build:lint:js',
+      // 'build:lint:css',
+    ],
     [
       'build:client',
       'build:server',
-    ], () => {
+    ],
+    () => {
       // Watch files
-      gulp.watch(config.files.client.src, ['build:client']);
       gulp.watch(config.files.server.src, ['build:server']);
-      // gulp.watch(config.files.client.src, ['build:lint:js']);
+      gulp.watch(config.files.client.src, ['build:lint:js']);
       // gulp.watch(config.files.css.src, ['build:lint:css']);
       // gulp.watch(config.files.client.src, ['build:flow']);
 
