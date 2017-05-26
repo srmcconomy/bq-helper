@@ -15,6 +15,7 @@ const wss = new WebSocketServer({ server });
 const store = createStore(reducer);
 
 wss.on('connection', socket => {
+  console.log('connect');
   socket.on('message', msg => {
     console.log(msg);
     store.dispatch(JSON.parse(msg));
