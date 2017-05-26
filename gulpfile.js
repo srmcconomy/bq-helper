@@ -17,8 +17,10 @@ const eslint = require('gulp-eslint');
 
 const config = require('./config');
 const webpackConfig = require('./webpack.config');
+const webpackProdConfig = require('./webpack.config.prod');
 
 const webpackCompiler = webpack(webpackConfig);
+const webpackProdCompiler = webpack(webpackProdConfig);
 
 let isRunningDevServer = false;
 
@@ -137,7 +139,7 @@ gulp.task('build:client', callback => {
 
 gulp.task('build:client:prod', callback => {
   // Run webpack
-  webpackCompiler.run(err => {
+  webpackProdCompiler.run(err => {
     if (err) throw new gutil.PluginError('build:client:prod', err);
 
     // Emulate gulp-size
