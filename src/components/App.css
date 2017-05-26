@@ -1,0 +1,35 @@
+.selected {
+  background: lightblue;
+}
+
+.hotkey {
+  width: 30px;
+  display: inline-block;
+  border-radius: 3px;
+  border: 1px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 5px;
+}
+
+.emptyHotkey {
+  width: 30px;
+  margin-right: 5px;
+  height: 20px;
+}
+
+.option {
+  display: flex;
+  margin: 5px 0;
+  margin-right: 20px;
+}
+
+.optionName {
+  display: inline-block;
+}
+
+.dest {
+  display: inline-block;
+  color: grey;
+}
