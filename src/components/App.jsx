@@ -269,12 +269,12 @@ class App extends Component {
         const conn = connections.get(this.props.connections.get(i));
         paths.push(
           ...this.navigate(
-            conn.end,
+            this.getEnd(conn),
             to,
             null,
             [],
             20,
-          ).map(path => [{ type: 'savewarp', exitName: connections.get(i).exitName, end: conn.end }, ...path]),
+          ).map(path => [{ type: 'savewarp', exitName: connections.get(i).exitName, end: this.getEnd(conn) }, ...path]),
         );
       }
     });
@@ -290,53 +290,60 @@ class App extends Component {
     const paths = [];
     conns.forEach((val, key) => {
       const conn = connections.get(val);
-      if (conn.end === to) {
-        paths.push([{ type: 'normal', exitName: connections.get(key).exitName, end: conn.end }]);
+      const end = this.getEnd(conn);
+      if (end === to) {
+        paths.push([{ type: 'normal', exitName: connections.get(key).exitName, end }]);
       } else {
         paths.push(
           ...this.navigate(
-            conn.end,
+            end,
             to,
             conn,
             [...visited, from],
             depth - 1,
-          ).map(path => [{ type: 'normal', exitName: connections.get(key).exitName, end: conn.end }, ...path]),
+          ).map(path => [{ type: 'normal', exitName: connections.get(key).exitName, end }, ...path]),
         );
       }
     });
     if (entrance && this.props.connections.has(entrance.id)) {
+      const conn = this.props.connections.get(entrance.id);
+      const end = this.getEnd(conn);
       paths.push(
         ...this.navigate(
-          this.props.connections.get(entrance.id).end,
+          end,
           to,
-          this.props.connections.get(entrance.id),
+          conn,
           [...visited, from],
           depth - 1,
-        ).map(path => [{ type: 'suns', end: this.props.connections.get(entrance.id).end }, ...path]),
+        ).map(path => [{ type: 'suns', end }, ...path]),
       );
     }
     const deathwarp = deathwarpWithRoom(from);
     if (deathwarp && this.props.connections.has(deathwarp.equivalent)) {
+      const conn = this.props.connections.get(deathwarp.equivalent);
+      const end = this.getEnd(conn);
       paths.push(
         ...this.navigate(
-          this.props.connections.get(deathwarp.equivalent).end,
+          end,
           to,
-          this.props.connections.get(deathwarp.equivalent),
+          conn,
           [...visited, from],
           depth - 1,
-        ).map(path => [{ type: 'deathwarp', end: this.props.connections.get(deathwarp.equivalent).end }, ...path]),
+        ).map(path => [{ type: 'deathwarp', end }, ...path]),
       );
     }
     const savewarp = savewarpWithRoom(from);
     if (savewarp && this.props.connections.has(savewarp.equivalent)) {
+      const conn = this.props.connections.get(savewarp.equivalent);
+      const end = this.getEnd(conn);
       paths.push(
         ...this.navigate(
-          this.props.connections.get(savewarp.equivalent).end,
+          end,
           to,
-          this.props.connections.get(savewarp.equivalent),
+          conn,
           [...visited, from],
           depth - 1,
-        ).map(path => [{ type: 'savewarp', end: this.props.connections.get(savewarp.equivalent).end }, ...path]),
+        ).map(path => [{ type: 'savewarp', end }, ...path]),
       );
     }
     return paths;
@@ -344,6 +351,14 @@ class App extends Component {
 
   handleBlur = () => {
     if (this.input) this.input.focus();
+  }
+
+  getEnd(connection) {
+    return typeof connection.end === 'object' ? connection.end[this.state.age] : connection.end;
+  }
+
+  getEndRoom(connection) {
+    return rooms.get(this.getEnd(connection));
   }
 
   selectRoom(room) {
@@ -434,15 +449,16 @@ class App extends Component {
                 {this.state.navigateList.map(path => (
                   <div>
                     {path.map(conn => {
+                      const end = this.getEndRoom(conn);
                       switch (conn.type) {
                         case 'suns':
-                          return <span>Sun's/Void => {rooms.get(conn.end).name}, </span>;
+                          return <span>Sun's/Void => {end.name}, </span>;
                         case 'savewarp':
-                          return <span>Save => {rooms.get(conn.end).name}, </span>;
+                          return <span>Save => {end.name}, </span>;
                         case 'deathwarp':
-                          return <span>Die => {rooms.get(conn.end).name}, </span>;
+                          return <span>Die => {end.name}, </span>;
                         default:
-                          return <span>{conn.exitName} => {rooms.get(conn.end).name}, </span>;
+                          return <span>{conn.exitName} => {end.name}, </span>;
                       }
                     })}
                   </div>
@@ -576,9 +592,11 @@ class App extends Component {
                     <span className={styles.hotkey}>{hotkeys[index]}</span>
                     <span className={styles.optionName} style={{ width: '300px' }}>{conn.exitName}</span>
                     <span className={styles.dest}>
-                      {this.props.connections.has(conn.id) ? rooms.get(
-                        connections.get(this.props.connections.get(conn.id)).end,
-                      ).name : '?'}
+                      {
+                        this.props.connections.has(conn.id) ?
+                          this.getEndRoom(connections.get(this.props.connections.get(conn.id))).name
+                          : '?'
+                      }
                     </span>
                   </div>
                 ))}
@@ -588,27 +606,45 @@ class App extends Component {
                   <span className={styles.hotkey}>F1</span>
                   <span className={styles.optionName} style={{ width: '150px' }}>Void/Sun's Song</span>
                   <span className={styles.dest}>
-                    {this.props.connections.has(this.state.suns) ? rooms.get(
-                      connections.get(this.props.connections.get(this.state.suns)).end,
-                    ).name : '?'}
+                    {
+                      this.props.connections.has(this.state.suns) ?
+                        this.getEndRoom(
+                          connections.get(
+                            this.props.connections.get(this.state.suns),
+                          ),
+                        ).name
+                        : '?'
+                    }
                   </span>
                 </div>
                 <div className={styles.option}>
                   <span className={styles.hotkey}>F2</span>
                   <span className={styles.optionName} style={{ width: '150px' }}>Die</span>
                   <span className={styles.dest}>
-                    {this.props.connections.has(this.state.die) ? rooms.get(
-                      connections.get(this.props.connections.get(this.state.die)).end,
-                    ).name : '?'}
+                    {
+                      this.props.connections.has(this.state.die) ?
+                        this.getEndRoom(
+                          connections.get(
+                            this.props.connections.get(this.state.die),
+                          ),
+                        ).name :
+                        '?'
+                    }
                   </span>
                 </div>
                 <div className={styles.option}>
                   <span className={styles.hotkey}>F3</span>
                   <span className={styles.optionName} style={{ width: '150px' }}>Save</span>
                   <span className={styles.dest}>
-                    {this.props.connections.has(this.state.save) ? rooms.get(
-                      connections.get(this.props.connections.get(this.state.save)).end,
-                    ).name : '?'}
+                    {
+                      this.props.connections.has(this.state.save) ?
+                        this.getEndRoom(
+                          connections.get(
+                            this.props.connections.get(this.state.save),
+                          ),
+                        ).name :
+                        '?'
+                    }
                   </span>
                 </div>
               </div>
@@ -618,9 +654,14 @@ class App extends Component {
                     <span className={styles.hotkey}>{songHotkeys[index]}</span>
                     <span className={styles.optionName} style={{ width: '100px' }}>{connections.get(song).exitName}</span>
                     <span className={styles.dest}>
-                      {this.props.connections.has(song) ? rooms.get(
-                        connections.get(this.props.connections.get(song)).end,
-                      ).name : '?'}
+                      {
+                        this.props.connections.has(song) ?
+                          this.getEndRoom(
+                            connections.get(this.props.connections.get(song)),
+                          ).name :
+                          '?'
+                      }
+
                     </span>
                   </div>
                 ))}
