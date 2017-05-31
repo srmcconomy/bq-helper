@@ -33,3 +33,10 @@
   display: inline-block;
   color: grey;
 }
+
+.left {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  height: 100vh;
+}

@@ -22,7 +22,7 @@ function connectionsWithEnd(end) {
 }
 
 function connectionHasStart(conn, start) {
-  return conn.start === start || (Array.isArray(conn.end) && conn.end.includes(start));
+  return conn.start === start || (Array.isArray(conn.start) && conn.start.includes(start));
 }
 
 function connectionsWithStart(start) {
@@ -97,6 +97,7 @@ class App extends Component {
       navigateList: [],
       navigate: false,
       navigateTo: null,
+      stateStack: new List(),
     };
   }
 
@@ -113,7 +114,8 @@ class App extends Component {
     const value = e.target.value;
     const selected = this.state.filteredList.get(this.state.selectedIndex);
     const filteredList = sortedRooms.filter(
-      room => room.name.toLowerCase().includes(value.toLowerCase()),
+      room => room.name.toLowerCase().includes(value.toLowerCase()) ||
+        room.description.toLowerCase().includes(value.toLowerCase()),
     );
     let selectedIndex = filteredList.indexOf(selected);
     if (selectedIndex === -1) {
@@ -156,11 +158,17 @@ class App extends Component {
         break;
       case 'Backquote':
         e.preventDefault();
-        this.setState({ navigateList: [], navigateTo: null, navigate: true, value: '', selectedIndex: 0 });
+        this.setState({ navigateList: [], filteredList: sortedRooms, navigateTo: null, navigate: true, value: '', selectedIndex: 0 });
         break;
-      case 'Escape':
+      case 'Escape': {
         e.preventDefault();
+        const newState = this.state.stateStack.first();
+        this.setState({
+          stateStack: this.state.stateStack.shift(),
+          ...newState,
+        });
         break;
+      }
       case 'F10':
         e.preventDefault();
         this.setState({ age: this.state.age === 'child' ? 'adult' : 'child' });
@@ -219,7 +227,7 @@ class App extends Component {
             }
           }
         }
-        if (/^\d$/.exec(e.key) || ((this.state.state === 'where-from' || this.state.state === 'where-to') && /^[a-z]$/.exec(e.key))) {
+        if (/^\d$/.exec(e.key) || ((this.state.state === 'where-from' || this.state.state === 'where-to') && /^[a-z]$/.exec(e.key) && !this.state.navigate)) {
           e.preventDefault();
           const index = hotkeys.indexOf(e.key);
           if (this.state.navigate) {
@@ -267,15 +275,19 @@ class App extends Component {
     [0, 1, ...warpsongs].forEach(i => {
       if (this.props.connections.has(i)) {
         const conn = connections.get(this.props.connections.get(i));
-        paths.push(
-          ...this.navigate(
-            this.getEnd(conn),
-            to,
-            null,
-            [],
-            20,
-          ).map(path => [{ type: 'savewarp', exitName: connections.get(i).exitName, end: this.getEnd(conn) }, ...path]),
-        );
+        const end = this.getEnd(conn);
+        if (end === to) paths.push([{ type: 'normal', exitName: connections.get(i).exitName, end }]);
+        else {
+          paths.push(
+            ...this.navigate(
+              end,
+              to,
+              null,
+              [],
+              5,
+            ).map(path => [{ type: 'normal', exitName: connections.get(i).exitName, end }, ...path]),
+          );
+        }
       }
     });
     return paths.sort((a, b) => a.length - b.length);
@@ -306,45 +318,57 @@ class App extends Component {
       }
     });
     if (entrance && this.props.connections.has(entrance.id)) {
-      const conn = this.props.connections.get(entrance.id);
+      const conn = connections.get(this.props.connections.get(entrance.id));
       const end = this.getEnd(conn);
-      paths.push(
-        ...this.navigate(
-          end,
-          to,
-          conn,
-          [...visited, from],
-          depth - 1,
-        ).map(path => [{ type: 'suns', end }, ...path]),
-      );
+      if (end === to) {
+        paths.push([{ type: 'suns', end }]);
+      } else {
+        paths.push(
+          ...this.navigate(
+            end,
+            to,
+            conn,
+            [...visited, from],
+            depth - 1,
+          ).map(path => [{ type: 'suns', end }, ...path]),
+        );
+      }
     }
     const deathwarp = deathwarpWithRoom(from);
     if (deathwarp && this.props.connections.has(deathwarp.equivalent)) {
-      const conn = this.props.connections.get(deathwarp.equivalent);
+      const conn = connections.get(this.props.connections.get(deathwarp.equivalent));
       const end = this.getEnd(conn);
-      paths.push(
-        ...this.navigate(
-          end,
-          to,
-          conn,
-          [...visited, from],
-          depth - 1,
-        ).map(path => [{ type: 'deathwarp', end }, ...path]),
-      );
+      if (end === to) {
+        paths.push([{ type: 'deathwarp', end }]);
+      } else {
+        paths.push(
+          ...this.navigate(
+            end,
+            to,
+            conn,
+            [...visited, from],
+            depth - 1,
+          ).map(path => [{ type: 'deathwarp', end }, ...path]),
+        );
+      }
     }
     const savewarp = savewarpWithRoom(from);
     if (savewarp && this.props.connections.has(savewarp.equivalent)) {
-      const conn = this.props.connections.get(savewarp.equivalent);
+      const conn = connections.get(this.props.connections.get(savewarp.equivalent));
       const end = this.getEnd(conn);
-      paths.push(
-        ...this.navigate(
-          end,
-          to,
-          conn,
-          [...visited, from],
-          depth - 1,
-        ).map(path => [{ type: 'savewarp', end }, ...path]),
-      );
+      if (end === to) {
+        paths.push([{ type: 'savewarp', end }]);
+      } else {
+        paths.push(
+          ...this.navigate(
+            end,
+            to,
+            conn,
+            [...visited, from],
+            depth - 1,
+          ).map(path => [{ type: 'savewarp', end }, ...path]),
+        );
+      }
     }
     return paths;
   }
@@ -362,19 +386,41 @@ class App extends Component {
   }
 
   selectRoom(room) {
+    let conns = connectionsWithEnd(room.id);
+    if (this.props.connections.has(this.state.currExit.id)) {
+      const nextEntrance = connections.get(this.props.connections.get(this.state.currExit.id));
+      conns = conns.filter(conn => conn.id !== nextEntrance.id).unshift(nextEntrance);
+    }
     this.setState({
+      stateStack: this.state.stateStack.setSize(9).unshift({
+        currEntrance: this.state.currEntrance,
+        room: this.state.room,
+        currExit: this.state.currExit,
+        state: this.state.state,
+      }),
       room,
       state: 'where-from',
-      connections: connectionsWithEnd(room.id),
+      connections: conns,
       selectedIndex: 0,
     });
   }
 
   selectExit(currExit) {
+    let filteredList = sortedRooms;
+    if (this.props.connections.has(currExit.id)) {
+      const nextRoom = this.getEndRoom(connections.get(this.props.connections.get(currExit.id)));
+      filteredList = sortedRooms.filter(room => room.id !== nextRoom.id).unshift(nextRoom);
+    }
     this.setState({
+      stateStack: this.state.stateStack.setSize(9).unshift({
+        currEntrance: this.state.currEntrance,
+        room: this.state.room,
+        currExit: this.state.currExit,
+        state: this.state.state,
+      }),
       currExit,
       state: 'choose-room',
-      filteredList: sortedRooms,
+      filteredList,
       selectedIndex: 0,
       value: '',
     });
@@ -391,6 +437,12 @@ class App extends Component {
     save = save ? save.equivalent : (this.state.age === 'child' ? connections.get(0).id : connections.get(1).id);
 
     this.setState({
+      stateStack: this.state.stateStack.setSize(9).unshift({
+        currEntrance: this.state.currEntrance,
+        room: this.state.room,
+        currExit: this.state.currExit,
+        state: this.state.state,
+      }),
       currEntrance,
       state: 'where-to',
       connections: connectionsWithStart(this.state.room.id),
@@ -413,7 +465,7 @@ class App extends Component {
 
   renderRight() {
     return (
-      <div>
+      <div style={{ width: '181px' }}>
         <div className={styles.option}>
           <span className={styles.hotkey}>Esc</span>
           Go back
@@ -440,7 +492,7 @@ class App extends Component {
       if (this.state.navigateTo) {
         if (this.state.navigateList.length > 0) {
           return (
-            <div>
+            <div className={styles.left}>
               <div>
                 <span>state: room: {this.state.room && this.state.room.name}, entrance: {this.state.currEntrance && this.state.currEntrance.entranceName}, exit: {this.state.currExit && this.state.currExit.exitName}</span>
               </div>
@@ -468,7 +520,7 @@ class App extends Component {
           );
         }
         return (
-          <div>
+          <div className={styles.left}>
             <div>
               <span>state: room: {this.state.room && this.state.room.name}, entrance: {this.state.currEntrance && this.state.currEntrance.entranceName}, exit: {this.state.currExit && this.state.currExit.exitName}</span>
             </div>
@@ -477,7 +529,7 @@ class App extends Component {
         );
       }
       return (
-        <div>
+        <div className={styles.left}>
           <div>
             <span>state: room: {this.state.room && this.state.room.name}, entrance: {this.state.currEntrance && this.state.currEntrance.entranceName}, exit: {this.state.currExit && this.state.currExit.exitName}</span>
           </div>
@@ -516,71 +568,96 @@ class App extends Component {
     switch (this.state.state) {
       case 'choose-room':
         return (
-          <div>
+          <div className={styles.left}>
             <div>
               <span>state: room: {this.state.room && this.state.room.name}, entrance: {this.state.currEntrance && this.state.currEntrance.entranceName}, exit: {this.state.currExit && this.state.currExit.exitName}</span>
             </div>
             <span>Where are you?</span>
-            <input
-              autoFocus
-              value={value}
-              onChange={this.handleChange}
-              onBlur={this.handleBlur}
-              ref={el => { this.input = el; }}
-            />
-            <div>
-              {this.state.filteredList.map((room, index) => (
-                <div
-                  key={room.name}
-                  className={c({
-                    [styles.option]: true,
-                    [styles.selected]: index === this.state.selectedIndex,
-                  })}
-                >
-                  <span
-                    className={c({
-                      [styles.hotkey]: index <= 9,
-                      [styles.emptyHotkey]: index > 9,
-                    })}
-                  >
-                    {index <= 9 && hotkeys[index]}
-                  </span>
-                  <span className={styles.optionName}>{room.name} {room.description ? ` (${room.description})` : ''}</span>
+            <div style={{ display: 'flex', flex: 1 }}>
+              <div>
+                <input
+                  autoFocus
+                  value={value}
+                  onChange={this.handleChange}
+                  onBlur={this.handleBlur}
+                  ref={el => { this.input = el; }}
+                />
+                <div>
+                  {this.state.filteredList.map((room, index) => (
+                    <div
+                      key={room.name}
+                      className={c({
+                        [styles.option]: true,
+                        [styles.selected]: index === this.state.selectedIndex,
+                      })}
+                    >
+                      <span
+                        className={c({
+                          [styles.hotkey]: index <= 9,
+                          [styles.emptyHotkey]: index > 9,
+                        })}
+                      >
+                        {index <= 9 && hotkeys[index]}
+                      </span>
+                      <span className={styles.optionName}>{room.name} {room.description ? ` (${room.description})` : ''}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+              <div style={{ flex: 1, height: '100vh', display: 'flex', flexDirection: 'column' }}>
+                {[1, 2, 3, 4, 5, 6].map(i => <div style={{ flex: 1, backgroundImage: `url(/assets/images/fort${i}.png)`, backgroundSize: 'contain', backgroundRepeat: 'no-repeat' }} />)}
+              </div>
             </div>
           </div>
         );
       case 'where-from':
         return (
-          <div>
+          <div className={styles.left}>
             <div>
               <span>state: room: {this.state.room && this.state.room.name}, entrance: {this.state.currEntrance && this.state.currEntrance.entranceName}, exit: {this.state.currExit && this.state.currExit.exitName}</span>
             </div>
             <span>What entrance did you come from?</span>
-            <div>
-              {this.state.connections.map((conn, index) => (
-                <div
-                  className={c({
-                    [styles.option]: true,
-                    [styles.selected]: index === this.state.selectedIndex,
-                  })}
-                >
-                  <span className={styles.hotkey}>{hotkeys[index]}</span>
-                  <span className={styles.optionName}>{conn.entranceName}</span>
-                </div>
-              ))}
+            <div style={{ display: 'flex', flex: 1 }}>
+              <div>
+                {this.state.connections.map((conn, index) => (
+                  <div
+                    className={c({
+                      [styles.option]: true,
+                      [styles.selected]: index === this.state.selectedIndex,
+                    })}
+                  >
+                    <span className={styles.hotkey}>{hotkeys[index]}</span>
+                    <span className={styles.optionName}>{conn.entranceName}</span>
+                  </div>
+                ))}
+              </div>
+              {
+                this.state.room.images ?
+                  <div style={{ display: 'flex', flex: 1, flexDirection: 'column' }}>
+                    {this.state.room.images.map(image => (
+                      <div
+                        style={{
+                          backgroundSize: 'contain',
+                          backgroundImage: `url(/assets/images/${image})`,
+                          flex: 1,
+                          backgroundRepeat: 'no-repeat',
+                        }}
+                      />
+                    ))}
+                  </div> :
+                  ''
+              }
             </div>
           </div>
         );
       case 'where-to': {
         return (
-          <div>
+          <div className={styles.left}>
             <div>
               <span>state: room: {this.state.room && this.state.room.name}, entrance: {this.state.currEntrance && this.state.currEntrance.entranceName}, exit: {this.state.currExit && this.state.currExit.exitName}</span>
             </div>
             <span>What exit did you take?</span>
-            <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', flex: 1 }}>
               <div>
                 {this.state.connections.map((conn, index) => (
                   <div
@@ -601,70 +678,90 @@ class App extends Component {
                   </div>
                 ))}
               </div>
-              <div>
-                <div className={styles.option}>
-                  <span className={styles.hotkey}>F1</span>
-                  <span className={styles.optionName} style={{ width: '150px' }}>Void/Sun's Song</span>
-                  <span className={styles.dest}>
-                    {
-                      this.props.connections.has(this.state.suns) ?
-                        this.getEndRoom(
-                          connections.get(
-                            this.props.connections.get(this.state.suns),
-                          ),
-                        ).name
-                        : '?'
-                    }
-                  </span>
-                </div>
-                <div className={styles.option}>
-                  <span className={styles.hotkey}>F2</span>
-                  <span className={styles.optionName} style={{ width: '150px' }}>Die</span>
-                  <span className={styles.dest}>
-                    {
-                      this.props.connections.has(this.state.die) ?
-                        this.getEndRoom(
-                          connections.get(
-                            this.props.connections.get(this.state.die),
-                          ),
-                        ).name :
-                        '?'
-                    }
-                  </span>
-                </div>
-                <div className={styles.option}>
-                  <span className={styles.hotkey}>F3</span>
-                  <span className={styles.optionName} style={{ width: '150px' }}>Save</span>
-                  <span className={styles.dest}>
-                    {
-                      this.props.connections.has(this.state.save) ?
-                        this.getEndRoom(
-                          connections.get(
-                            this.props.connections.get(this.state.save),
-                          ),
-                        ).name :
-                        '?'
-                    }
-                  </span>
-                </div>
-              </div>
-              <div>
-                {warpsongs.map((song, index) => (
-                  <div className={styles.option}>
-                    <span className={styles.hotkey}>{songHotkeys[index]}</span>
-                    <span className={styles.optionName} style={{ width: '100px' }}>{connections.get(song).exitName}</span>
-                    <span className={styles.dest}>
-                      {
-                        this.props.connections.has(song) ?
-                          this.getEndRoom(
-                            connections.get(this.props.connections.get(song)),
-                          ).name :
-                          '?'
-                      }
-
-                    </span>
+              <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                <div style={{ display: 'flex' }}>
+                  <div>
+                    <div className={styles.option}>
+                      <span className={styles.hotkey}>F1</span>
+                      <span className={styles.optionName} style={{ width: '150px' }}>Void/Sun's Song</span>
+                      <span className={styles.dest}>
+                        {
+                          this.props.connections.has(this.state.suns) ?
+                            this.getEndRoom(
+                              connections.get(
+                                this.props.connections.get(this.state.suns),
+                              ),
+                            ).name
+                            : '?'
+                        }
+                      </span>
+                    </div>
+                    <div className={styles.option}>
+                      <span className={styles.hotkey}>F2</span>
+                      <span className={styles.optionName} style={{ width: '150px' }}>Die</span>
+                      <span className={styles.dest}>
+                        {
+                          this.props.connections.has(this.state.die) ?
+                            this.getEndRoom(
+                              connections.get(
+                                this.props.connections.get(this.state.die),
+                              ),
+                            ).name :
+                            '?'
+                        }
+                      </span>
+                    </div>
+                    <div className={styles.option}>
+                      <span className={styles.hotkey}>F3</span>
+                      <span className={styles.optionName} style={{ width: '150px' }}>Save</span>
+                      <span className={styles.dest}>
+                        {
+                          this.props.connections.has(this.state.save) ?
+                            this.getEndRoom(
+                              connections.get(
+                                this.props.connections.get(this.state.save),
+                              ),
+                            ).name :
+                            '?'
+                        }
+                      </span>
+                    </div>
                   </div>
-                ))}
+                  <div>
+                    {warpsongs.map((song, index) => (
+                      <div className={styles.option}>
+                        <span className={styles.hotkey}>{songHotkeys[index]}</span>
+                        <span className={styles.optionName} style={{ width: '100px' }}>{connections.get(song).exitName}</span>
+                        <span className={styles.dest}>
+                          {
+                            this.props.connections.has(song) ?
+                              this.getEndRoom(
+                                connections.get(this.props.connections.get(song)),
+                              ).name :
+                              '?'
+                          }
+
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {
+                  this.state.room.images ?
+                    <div style={{ display: 'flex', flex: 1, flexDirection: 'column' }}>
+                      {this.state.room.images.map(image => (
+                        <div
+                          style={{
+                            backgroundSize: 'contain',
+                            backgroundImage: `url(/assets/images/${image})`,
+                            flex: 1,
+                            backgroundRepeat: 'no-repeat',
+                          }}
+                        />
+                      ))}
+                    </div> :
+                    ''
+                }
               </div>
             </div>
           </div>

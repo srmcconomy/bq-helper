@@ -1,12 +1,12 @@
 const connections = [{
   entranceName: 'Load Game as Child',
-  exitName: false,
+  exitName: 'Child Savewarp',
   start: null,
   end: 0,
   id: 0,
 }, {
   entranceName: 'Load Game as Adult',
-  exitName: false,
+  exitName: 'Adult Savewarp',
   start: null,
   end: 46,
   id: 1,
@@ -299,13 +299,13 @@ const connections = [{
   end: null,
   id: 49,
 }, {
-  entranceName: 'Ocarina of Time Cutscene',
+  entranceName: 'Ocarina of Time Cutscene (holding ocarina)',
   exitName: 'Ocarina of Time Cutscene',
   start: 7,
   end: 7,
   id: 50,
 }, {
-  entranceName: "Zelda's Escape Cutscene",
+  entranceName: "Zelda's Escape Cutscene (facing towards Market, not falling)",
   exitName: "Zelda's Escape Cutscene",
   start: 7,
   end: 7,
@@ -1268,7 +1268,7 @@ const connections = [{
   end: 60,
   id: 210,
 }, {
-  entranceName: 'Ramp goes down towards door (D)',
+  entranceName: 'Ramp goes down towards door, red feather (D)',
   exitName: 'Ground - middle (D)',
   start: 59,
   end: 61,
@@ -1286,7 +1286,7 @@ const connections = [{
   end: 62,
   id: 213,
 }, {
-  entranceName: 'Ramp goes up towards door (E)',
+  entranceName: 'Ramp goes up towards door, blue feather (E)',
   exitName: '2nd floor - middle (E)',
   start: 59,
   end: 61,
@@ -1304,7 +1304,7 @@ const connections = [{
   end: 64,
   id: 216,
 }, {
-  entranceName: 'Entrance (L)',
+  entranceName: 'Entrance, green feather (L)',
   exitName: '3rd floor - facing south (L)',
   start: 59,
   end: 65,
@@ -1424,15 +1424,15 @@ const connections = [{
   end: 59,
   id: 236,
 }, {
-  entranceName: 'Thrown into river',
+  entranceName: 'Thrown into river/Put beside tent',
   exitName: 'Caught by guards, no Hookshot',
-  start: [0, 0, 0, 0, 0, 0, 0, 0],
+  start: [59, 60, 61, 62, 63, 64, 65, 57],
   end: 57,
   id: 237,
 }, {
   entranceName: 'Caught by guards',
   exitName: 'Caught by guards, Hookshot',
-  start: [0, 0, 0, 0, 0, 0, 0, 0],
+  start: [59, 60, 61, 62, 63, 64, 65, 57],
   end: 59,
   id: 238,
 }, {
@@ -1595,7 +1595,7 @@ const connections = [{
   entranceName: 'Forest Medallion Cutscene',
   exitName: 'Forest Medallion Cutscene',
   start: 82,
-  end: 9,
+  end: 1,
   id: 265,
 }, {
   entranceName: 'Forest Temple Warp',
@@ -1924,7 +1924,7 @@ const connections = [{
 }, {
   entranceName: "Din's Fire/Double Defence",
   exitName: 'Exit',
-  start: [0, 0],
+  start: [102, 103],
   end: {
     child: 47,
     adult: 125,
@@ -2065,36 +2065,38 @@ const connections = [{
 }, {
   entranceName: 'Minuet Warp',
   exitName: 'Minuet',
-  end: 'Sacred Forest Meadow',
+  start: false,
+  end: 9,
   id: 343,
 }, {
   entranceName: 'Bolero Warp',
   exitName: 'Bolero',
-  end: 'Death Mountain Crater',
+  start: false,
+  end: 17,
   id: 344,
 }, {
   entranceName: 'Serenade Warp',
   exitName: 'Serenade',
-  start: null,
-  end: 'Lake Hylia',
+  start: false,
+  end: 50,
   id: 345,
 }, {
   entranceName: 'Nocturne Warp',
   exitName: 'Nocturne',
-  start: null,
-  end: 'Graveyard',
+  start: false,
+  end: 27,
   id: 346,
 }, {
   entranceName: 'Requiem Warp',
   exitName: 'Requiem',
-  start: null,
-  end: 'Desert Colossus',
+  start: false,
+  end: 67,
   id: 347,
 }, {
   entranceName: 'Prelude Warp',
   exitName: 'Prelude',
-  start: null,
-  end: 'Temple of Time',
+  start: false,
+  end: 46,
   id: 348,
 }];
 export default connections;

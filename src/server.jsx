@@ -29,8 +29,9 @@ server.listen(process.env.PORT || config.ports.express, () => {
   console.log(`listening on port ${process.env.PORT}` || config.ports.express);
 });
 
+console.log(__dirname)
 app.use('/assets', express.static(
-  path.join(__dirname, 'static'),
+  path.join(__dirname, '../assets'),
 ));
 
 

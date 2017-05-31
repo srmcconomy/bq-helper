@@ -237,30 +237,37 @@ const rooms = [{
 }, {
   name: 'Gerudo Fortress Exterior',
   description: '',
+  images: ['fortress.jpg'],
   id: 59,
 }, {
   name: 'Gerudo Fortress Interior 1',
-  description: 'Carpenter, no ramps',
+  description: 'Red Cell Carpenter, no ramps',
+  images: ['fort1.png', 'int1.jpg'],
   id: 60,
 }, {
   name: 'Gerudo Fortress Interior 2',
   description: 'Hallway with 2 ramps and room with table and 2 ramps',
+  images: ['fort2.png', 'int2.jpg'],
   id: 61,
 }, {
   name: 'Gerudo Fortress Interior 3',
-  description: 'Carpenter, both ramps go down towards middle',
+  description: 'Yellow-Green Cell Carpenter, both ramps go down towards middle',
+  images: ['fort3.png', 'int3.jpg'],
   id: 62,
 }, {
   name: 'Gerudo Fortress Interior 4',
-  description: 'Carpenter, one ramp goes up and one goes down',
+  description: 'Blue Cell Carpenter, one ramp goes up and one goes down',
+  images: ['fort4.png', 'int4.jpg'],
   id: 63,
 }, {
   name: 'Gerudo Fortress Interior 5',
   description: 'Table and tall ramp',
+  images: ['fort5.png', 'int5.jpg'],
   id: 64,
 }, {
   name: 'Gerudo Fortress Interior 6',
-  description: 'Carpenter, long hallway with guard',
+  description: 'Green Cell Carpenter, long hallway with guard',
+  images: ['fort6.png', 'int6.jpg'],
   id: 65,
 }, {
   name: 'Haunted Wasteland',

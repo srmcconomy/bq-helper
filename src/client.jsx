@@ -14,7 +14,7 @@ const store = createStore(
   reducer,
   new Map(Object.keys(window.INITIAL_STATE).map(key => [+key, window.INITIAL_STATE[key]])),
 );
-const ws = new WebSocket(`ws://${window.location.host}:8089`);
+const ws = new WebSocket(`ws://${window.location.host}`);
 ws.addEventListener('message', msg => {
   store.dispatch(JSON.parse(msg.data));
 });
