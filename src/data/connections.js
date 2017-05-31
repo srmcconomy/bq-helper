@@ -970,7 +970,7 @@ const connections = [{
 }, {
   entranceName: "Hyrule/Ganon's Castle Exterior",
   exitName: 'Market',
-  start: [0, 0],
+  start: [47, 125],
   end: 34,
   id: 161,
 }, {
