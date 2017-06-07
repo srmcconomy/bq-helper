@@ -48,7 +48,7 @@ const connections = [{
   id: 7,
 }, {
   entranceName: 'Kokiri Forest',
-  exitName: 'Hyrule Field',
+  exitName: 'Lost Woods',
   start: 1,
   end: 8,
   id: 8,
@@ -449,7 +449,7 @@ const connections = [{
   end: 21,
   id: 74,
 }, {
-  entranceName: 'Door',
+  entranceName: 'Rear Door',
   exitName: 'Potion Shop rear',
   start: 18,
   end: 21,

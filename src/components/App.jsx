@@ -163,6 +163,39 @@ class App extends Component {
       case 'Escape': {
         e.preventDefault();
         const newState = this.state.stateStack.first();
+        switch (newState.state) {
+          case 'choose-room': {
+            let filteredList = sortedRooms;
+            if (this.props.connections.has(newState.currExit.id)) {
+              const nextRoom = this.getEndRoom(connections.get(this.props.connections.get(newState.currExit.id)));
+              filteredList = sortedRooms.filter(room => room.id !== nextRoom.id).unshift(nextRoom);
+            }
+            newState.filteredList = filteredList;
+            break;
+          }
+          case 'where-to': {
+            newState.suns = newState.currEntrance.id;
+            let die = deathwarpWithRoom(newState.room.id);
+            let save = savewarpWithRoom(newState.room.id);
+            die = die ? die.equivalent : newState.suns;
+            save = save ? save.equivalent : (this.state.age === 'child' ? connections.get(0).id : connections.get(1).id);
+            newState.die = die;
+            newState.save = save;
+            newState.connections = connectionsWithStart(newState.room.id);
+            break;
+          }
+          case 'where-from': {
+            let conns = connectionsWithEnd(newState.room.id);
+            if (this.props.connections.has(newState.currExit.id)) {
+              const nextEntrance = connections.get(this.props.connections.get(newState.currExit.id));
+              conns = conns.filter(conn => conn.id !== nextEntrance.id).unshift(nextEntrance);
+            }
+            newState.connections = conns;
+            break;
+          }
+          default:
+            break;
+        }
         this.setState({
           stateStack: this.state.stateStack.shift(),
           ...newState,
@@ -387,7 +420,7 @@ class App extends Component {
 
   selectRoom(room) {
     let conns = connectionsWithEnd(room.id);
-    if (this.props.connections.has(this.state.currExit.id)) {
+    if (this.state.currExit && this.props.connections.has(this.state.currExit.id)) {
       const nextEntrance = connections.get(this.props.connections.get(this.state.currExit.id));
       conns = conns.filter(conn => conn.id !== nextEntrance.id).unshift(nextEntrance);
     }
