@@ -10,6 +10,8 @@ import warpsongs from '../data/warpsongs';
 import deathwarps from '../data/deathwarps';
 import savewarps from '../data/savewarps';
 
+const Worker = require('worker-loader?inline!../worker');
+
 const rooms = new List(rs);
 const connections = new List(cs);
 
@@ -94,7 +96,7 @@ class App extends Component {
       die: null,
       save: null,
       age: 'child',
-      navigateList: [],
+      navigateList: new List(),
       navigate: false,
       navigateTo: null,
       stateStack: new List(),
@@ -108,6 +110,12 @@ class App extends Component {
 
   componentWillUnmount() {
     document.body.removeEventListener('keyup', this.handleKeyPress);
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.worker && !this.state.navigate && prevState.navigate) {
+      this.worker.terminate();
+    }
   }
 
   handleChange = (e) => {
@@ -158,7 +166,7 @@ class App extends Component {
         break;
       case 'Backquote':
         e.preventDefault();
-        this.setState({ navigateList: [], filteredList: sortedRooms, navigateTo: null, navigate: true, value: '', selectedIndex: 0 });
+        this.setState({ navigateList: new List(), filteredList: sortedRooms, navigateTo: null, navigate: true, value: '', selectedIndex: 0 });
         break;
       case 'Escape': {
         e.preventDefault();
@@ -212,9 +220,10 @@ class App extends Component {
           if (!this.state.navigateTo) {
             this.setState({
               navigateTo: this.state.filteredList.get(this.state.selectedIndex),
-              navigateList: this.fullNavigate(
+            }, () => {
+              this.fullNavigate2(
                 this.state.filteredList.get(this.state.selectedIndex).id,
-              ),
+              );
             });
           }
         } else {
@@ -267,7 +276,8 @@ class App extends Component {
             if (!this.state.navigateTo) {
               this.setState({
                 navigateTo: this.state.filteredList.get(index),
-                navigateList: this.fullNavigate(this.state.filteredList.get(index).id),
+              }, () => {
+                this.fullNavigate2(this.state.filteredList.get(index).id);
               });
             }
           } else {
@@ -300,6 +310,104 @@ class App extends Component {
         }
         break;
     }
+  }
+
+  fullNavigate2(to) {
+    if (this.worker) this.worker.terminate();
+    this.worker = new Worker();
+    this.worker.postMessage({
+      connections: this.props.connections.toJS(),
+      to,
+      age: this.state.age,
+      room: this.state.room,
+      currEntrance: this.state.currEntrance,
+    });
+    this.worker.onmessage = e => {
+      const i = this.state.navigateList.findLastIndex(path => path.length <= e.data.length);
+      this.setState({
+        navigateList: i === -1 ? this.state.navigateList.unshift(e.data).take(20) : this.state.navigateList.insert(i + 1, e.data).take(20),
+      });
+    };
+  }
+
+  navigate2(from, to, entrance, visited, depth) {
+    if (depth === 0) return [];
+    if (visited.includes(from)) return [];
+    const conns = this.props.connections.filter(
+      (val, key) => connectionHasStart(connections.get(key), from),
+    );
+    const paths = [];
+    conns.forEach((val, key) => {
+      const conn = connections.get(val);
+      const end = this.getEnd(conn);
+      if (end === to) {
+        paths.push([{ type: 'normal', exitName: connections.get(key).exitName, end }]);
+      } else {
+        paths.push(
+          ...this.navigate(
+            end,
+            to,
+            conn,
+            [...visited, from],
+            depth - 1,
+          ).map(path => [{ type: 'normal', exitName: connections.get(key).exitName, end }, ...path]),
+        );
+      }
+    });
+    if (entrance && this.props.connections.has(entrance.id)) {
+      const conn = connections.get(this.props.connections.get(entrance.id));
+      const end = this.getEnd(conn);
+      if (end === to) {
+        paths.push([{ type: 'suns', end }]);
+      } else {
+        paths.push(
+          ...this.navigate(
+            end,
+            to,
+            conn,
+            [...visited, from],
+            depth - 1,
+          ).map(path => [{ type: 'suns', end }, ...path]),
+        );
+      }
+    }
+    const deathwarp = deathwarpWithRoom(from);
+    if (deathwarp && this.props.connections.has(deathwarp.equivalent)) {
+      const conn = connections.get(this.props.connections.get(deathwarp.equivalent));
+      const end = this.getEnd(conn);
+      if (end === to) {
+        paths.push([{ type: 'deathwarp', end }]);
+      } else {
+        paths.push(
+          ...this.navigate(
+            end,
+            to,
+            conn,
+            [...visited, from],
+            depth - 1,
+          ).map(path => [{ type: 'deathwarp', end }, ...path]),
+        );
+      }
+    }
+    const savewarp = savewarpWithRoom(from);
+    if (savewarp && this.props.connections.has(savewarp.equivalent)) {
+      const conn = connections.get(this.props.connections.get(savewarp.equivalent));
+      const end = this.getEnd(conn);
+      if (end === to) {
+        paths.push([{ type: 'savewarp', end }]);
+      } else {
+        paths.push(
+          ...this.navigate(
+            end,
+            to,
+            conn,
+            [...visited, from],
+            depth - 1,
+          ).map(path => [{ type: 'savewarp', end }, ...path]),
+        );
+      }
+    }
+    return paths;
   }
 
   fullNavigate(to) {
@@ -523,7 +631,7 @@ class App extends Component {
     const { value } = this.state;
     if (this.state.navigate) {
       if (this.state.navigateTo) {
-        if (this.state.navigateList.length > 0) {
+        if (this.state.navigateList.size > 0) {
           return (
             <div className={styles.left}>
               <div>
@@ -532,7 +640,7 @@ class App extends Component {
               <span>To get to {this.state.navigateTo.name}:</span>
               <div>
                 {this.state.navigateList.map(path => (
-                  <div>
+                  <div style={{margin: '5px' }}>
                     {path.map(conn => {
                       const end = this.getEndRoom(conn);
                       switch (conn.type) {
@@ -807,7 +915,5 @@ class App extends Component {
 }
 
 export default connect(
-  state => ({
-    connections: state,
-  }),
+  state => ({ connections: state }),
 )(App);

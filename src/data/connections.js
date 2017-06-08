@@ -178,6 +178,10 @@ const connections = [{
   start: 9,
   end: 74,
   id: 29,
+  exitRegion: {
+    child: 1,
+    adult: 0,
+  }
 }, {
   entranceName: 'Entrance',
   exitName: 'Grotto',
@@ -202,6 +206,7 @@ const connections = [{
   start: 9,
   end: 9,
   id: 33,
+  unique: true,
 }, {
   entranceName: 'Hyrule Field',
   exitName: 'Lost Woods',
@@ -304,12 +309,14 @@ const connections = [{
   start: 7,
   end: 7,
   id: 50,
+  unique: true,
 }, {
   entranceName: "Zelda's Escape Cutscene (facing towards Market, not falling)",
   exitName: "Zelda's Escape Cutscene",
   start: 7,
   end: 7,
   id: 51,
+  unique: true,
 }, {
   entranceName: 'Lon-Lon Ranch',
   exitName: 'Hyrule Field',
@@ -340,30 +347,35 @@ const connections = [{
   start: 53,
   end: 7,
   id: 56,
+  hard: true,
 }, {
   entranceName: 'Lon-Lon Ranch - east fence',
   exitName: 'East fence',
   start: 53,
   end: 7,
   id: 57,
+  hard: true,
 }, {
   entranceName: 'Lon-Lon Ranch - south fence',
   exitName: 'South fence',
   start: 53,
   end: 7,
   id: 58,
+  hard: true,
 }, {
   entranceName: 'Lon-Lon Ranch - west fence',
   exitName: 'West fence',
   start: 53,
   end: 7,
   id: 59,
+  hard: true,
 }, {
   entranceName: "Epona's Song Cutscene",
   exitName: "Epona's Song Cutscene",
   start: 53,
   end: 53,
   id: 60,
+  unique: true,
 }, {
   entranceName: 'Barn',
   exitName: 'Door',
@@ -400,12 +412,20 @@ const connections = [{
   start: 18,
   end: 16,
   id: 66,
+  exitRegion: {
+    adult: 0,
+    child: 1,
+  },
 }, {
   entranceName: 'Kakariko Village',
   exitName: 'Bottom of the Well',
   start: 18,
   end: 68,
   id: 67,
+  hard: {
+    child: false,
+    adult: true,
+  },
 }, {
   entranceName: 'Door',
   exitName: "Impa's House (adult skull on roof)",
@@ -430,6 +450,10 @@ const connections = [{
   start: 18,
   end: 19,
   id: 71,
+  hard: {
+    child: true,
+    adult: false,
+  },
 }, {
   entranceName: 'Door',
   exitName: 'Party House',
@@ -460,6 +484,10 @@ const connections = [{
   start: 18,
   end: 22,
   id: 76,
+  hard: {
+    child: true,
+    adult: false,
+  }
 }, {
   entranceName: 'Door',
   exitName: 'Windmill',
@@ -484,6 +512,7 @@ const connections = [{
   start: 18,
   end: 18,
   id: 80,
+  unique: true,
 }, {
   entranceName: "Impa's House (adult skull on roof)",
   exitName: 'Door',
@@ -496,6 +525,10 @@ const connections = [{
   start: 25,
   end: 18,
   id: 82,
+  exitRegion: {
+    adult: 1,
+    child: 1,
+  },
 }, {
   entranceName: 'Archery Game',
   exitName: 'Door',
@@ -550,12 +583,17 @@ const connections = [{
   start: 23,
   end: 27,
   id: 91,
+  exitRegion: {
+    child: 1,
+    adult: 1,
+  },
 }, {
   entranceName: 'Song of Storms cutscene',
   exitName: 'Song of Storms cutscene',
   start: 23,
   end: 23,
   id: 92,
+  unique: true,
 }, {
   entranceName: 'Graveyard',
   exitName: 'Kakariko Village',
@@ -580,6 +618,14 @@ const connections = [{
   start: 27,
   end: 23,
   id: 96,
+  accessibleRegions: {
+    child: [1],
+    adult: [1, 0],
+  },
+  hard: {
+    child: true,
+    adult: false,
+  },
 }, {
   entranceName: 'Entrance',
   exitName: 'Shield Grave',
@@ -634,6 +680,10 @@ const connections = [{
   start: 16,
   end: 18,
   id: 105,
+  accessibleRegions: {
+    child: [1, 0],
+    adult: 0,
+  },
 }, {
   entranceName: 'Death Mountain Trail',
   exitName: 'Goron City',
@@ -676,6 +726,10 @@ const connections = [{
   start: 16,
   end: 18,
   id: 112,
+  hard: {
+    child: true,
+    adult: true,
+  },
 }, {
   entranceName: 'Goron City',
   exitName: 'Death Mountain Trail',
@@ -736,6 +790,10 @@ const connections = [{
   start: 17,
   end: 101,
   id: 122,
+  hard: {
+    child: false,
+    adult: true,
+  }
 }, {
   entranceName: false,
   exitName: 'Upper grotto',
@@ -799,48 +857,80 @@ const connections = [{
   start: 34,
   end: 41,
   id: 132,
+  hard: {
+    child: false,
+    adult: true,
+  },
 }, {
   entranceName: 'Market right',
   exitName: 'Back Alley right',
   start: 34,
   end: 41,
   id: 133,
+  hard: {
+    child: false,
+    adult: true,
+  },
 }, {
   entranceName: 'Door',
   exitName: 'Chest Game',
   start: 34,
   end: 40,
   id: 134,
+  hard: {
+    child: false,
+    adult: true,
+  },
 }, {
   entranceName: 'Door',
   exitName: 'Bombchu Bowling',
   start: 34,
   end: 35,
   id: 135,
+  hard: {
+    child: false,
+    adult: true,
+  },
 }, {
   entranceName: 'Door',
   exitName: 'Slingshot Game',
   start: 34,
   end: 36,
   id: 136,
+  hard: {
+    child: false,
+    adult: true,
+  },
 }, {
   entranceName: 'Door',
   exitName: 'Happy Mask Shop',
   start: 34,
   end: 37,
   id: 137,
+  hard: {
+    child: false,
+    adult: true,
+  },
 }, {
   entranceName: 'Door',
   exitName: 'Potion Shop',
   start: 34,
   end: 39,
   id: 138,
+  hard: {
+    child: false,
+    adult: true,
+  },
 }, {
   entranceName: 'Door',
   exitName: 'Bazaar',
   start: 34,
   end: 38,
   id: 139,
+  hard: {
+    child: false,
+    adult: true,
+  },
 }, {
   entranceName: 'Chest Game',
   exitName: 'Door',
@@ -853,6 +943,7 @@ const connections = [{
   start: 35,
   end: 34,
   id: 141,
+
 }, {
   entranceName: 'Slingshot Game',
   exitName: 'Door',
@@ -949,24 +1040,34 @@ const connections = [{
   start: 46,
   end: 46,
   id: 157,
+  hard: {
+    child: false,
+    adult: true,
+  },
 }, {
   entranceName: 'Become Child Cutscene',
   exitName: 'Become Child Cutscene',
   start: 46,
   end: 46,
   id: 158,
+  hard: {
+    child: true,
+    adult: false,
+  },
 }, {
   entranceName: 'Light Arrow Cutscene',
   exitName: 'Light Arrow Cutscene',
   start: 46,
   end: 46,
   id: 159,
+  unique: true,
 }, {
   entranceName: 'Prelude Cutscene',
   exitName: 'Prelude Cutscene',
   start: 46,
   end: 46,
   id: 160,
+  unique: true,
 }, {
   entranceName: "Hyrule/Ganon's Castle Exterior",
   exitName: 'Market',
@@ -1015,6 +1116,10 @@ const connections = [{
   start: 48,
   end: 47,
   id: 168,
+  hard: {
+    child: false,
+    adult: true,
+  },
 }, {
   entranceName: 'Hyrule Castle Interior',
   exitName: "Zelda's Room",
@@ -1039,6 +1144,7 @@ const connections = [{
   start: 49,
   end: 7,
   id: 172,
+  unique: true,
 }, {
   entranceName: "Zora's River Land",
   exitName: 'Hyrule Field Land',
@@ -1135,12 +1241,20 @@ const connections = [{
   start: 13,
   end: 73,
   id: 188,
+  hard: {
+    child: false,
+    adult: true,
+  },
 }, {
   entranceName: "Zora's Fountain",
   exitName: 'Ice Cavern',
   start: 13,
   end: 69,
   id: 189,
+  exitRegion: {
+    child: 1,
+    adult: 0,
+  },
 }, {
   entranceName: 'Lake Hylia',
   exitName: 'Hyrule Field',
@@ -1159,6 +1273,10 @@ const connections = [{
   start: 50,
   end: 52,
   id: 192,
+  exitRegion: {
+    child: 0,
+    adult: 1,
+  },
 }, {
   entranceName: 'Door',
   exitName: 'Laboratory',
@@ -1177,6 +1295,10 @@ const connections = [{
   start: 50,
   end: 7,
   id: 195,
+  hard: {
+    child: false,
+    adult: true,
+  },
 }, {
   entranceName: 'Entrance',
   exitName: 'Grave',
@@ -1195,6 +1317,10 @@ const connections = [{
   start: 52,
   end: 50,
   id: 198,
+  accessibleRegions: {
+    child: [0],
+    adult: [1, 0],
+  },
 }, {
   entranceName: 'Gerudo Valley',
   exitName: 'Hyrule Field',
@@ -1303,12 +1429,20 @@ const connections = [{
   start: 59,
   end: 64,
   id: 216,
+  exitRegion: {
+    child: 3,
+    adult: 0,
+  },
 }, {
   entranceName: 'Entrance, green feather (L)',
   exitName: '3rd floor - facing south (L)',
   start: 59,
   end: 65,
   id: 217,
+  exitRegion: {
+    child: 4,
+    adult: 0,
+  },
 }, {
   entranceName: 'Ramp with straightaway above table (F)',
   exitName: '3rd floor - middle (F)',
@@ -1327,12 +1461,24 @@ const connections = [{
   start: 59,
   end: 61,
   id: 220,
+  exitRegion: {
+    child: 5,
+    adult: 0,
+  },
 }, {
   entranceName: 'Ramp (N)',
   exitName: 'Roof (N)',
   start: 59,
   end: 64,
   id: 221,
+  accessibleRegions: {
+    child: [1],
+    adult: [0],
+  },
+  exitRegion: {
+    child: 2,
+    adult: 2,
+  },
 }, {
   entranceName: false,
   exitName: 'Grotto (A)',
@@ -1345,6 +1491,10 @@ const connections = [{
   start: 59,
   end: 59,
   id: 223,
+  hard: {
+    child: true,
+    adult: true,
+  },
 }, {
   entranceName: 'Ground - northmost (B)',
   exitName: 'Hallway with turn (B)',
@@ -1417,12 +1567,24 @@ const connections = [{
   start: 61,
   end: 59,
   id: 235,
+  accessibleRegions: {
+    child: [5, 4, 3],
+    adult: [0],
+  },
 }, {
   entranceName: 'Roof (N)',
   exitName: 'Ramp (N)',
   start: 64,
   end: 59,
   id: 236,
+  accessibleRegions: {
+    child: [2, 3],
+    adult: [2, 3],
+  },
+  exitRegion: {
+    child: 1,
+    adult: 0,
+  },
 }, {
   entranceName: 'Thrown into river/Put beside tent',
   exitName: 'Caught by guards, no Hookshot',
@@ -1489,12 +1651,14 @@ const connections = [{
   start: 67,
   end: 67,
   id: 247,
+  unique: true,
 }, {
   entranceName: 'Silver Gauntlets Cutscene',
   exitName: 'Silver Gauntlets Cutscene',
   start: 67,
   end: 67,
   id: 248,
+  unique: true,
 }, {
   entranceName: 'Deku Tree',
   exitName: 'Kokiri Forest',
@@ -1519,6 +1683,7 @@ const connections = [{
   start: 79,
   end: 1,
   id: 252,
+  unique: true,
 }, {
   entranceName: 'Deku Tree Warp',
   exitName: 'Warp',
@@ -1549,6 +1714,7 @@ const connections = [{
   start: 80,
   end: 16,
   id: 257,
+  unique: true,
 }, {
   entranceName: "Dodongo's Cavern Warp",
   exitName: 'Warp',
@@ -1573,6 +1739,7 @@ const connections = [{
   start: 81,
   end: 13,
   id: 261,
+  unique: true,
 }, {
   entranceName: "Jabu-Jabu's Belly Warp",
   exitName: 'Warp',
@@ -1585,6 +1752,10 @@ const connections = [{
   start: 74,
   end: 9,
   id: 263,
+  accessibleRegions: {
+    child: [1, 0],
+    adult: [0],
+  },
 }, {
   entranceName: 'Forest Temple',
   exitName: "Phantom Ganon's Room",
@@ -1597,6 +1768,7 @@ const connections = [{
   start: 82,
   end: 1,
   id: 265,
+  unique: true,
 }, {
   entranceName: 'Forest Temple Warp',
   exitName: 'Warp',
@@ -1621,6 +1793,7 @@ const connections = [{
   start: 83,
   end: 17,
   id: 269,
+  unique: true,
 }, {
   entranceName: 'Fire Temple Warp',
   exitName: 'Warp',
@@ -1645,6 +1818,7 @@ const connections = [{
   start: 84,
   end: 50,
   id: 273,
+  unique: true,
 }, {
   entranceName: 'Water Temple Warp',
   exitName: 'Warp',
@@ -1669,6 +1843,7 @@ const connections = [{
   start: 85,
   end: 27,
   id: 277,
+  unique: true,
 }, {
   entranceName: 'Shadow Temple Warp',
   exitName: 'Warp',
@@ -1705,6 +1880,7 @@ const connections = [{
   start: 86,
   end: 67,
   id: 283,
+  unique: true,
 }, {
   entranceName: 'Spirit Temple Warp',
   exitName: 'Warp',
@@ -1717,12 +1893,17 @@ const connections = [{
   start: 69,
   end: 13,
   id: 285,
+  accessibleRegions: {
+    child: [1, 0],
+    adult: [0],
+  },
 }, {
   entranceName: 'Serenade Cutscene',
   exitName: 'Serenade Cutscene',
   start: 69,
   end: 69,
   id: 286,
+  unique: true,
 }, {
   entranceName: 'Bottom of the Well',
   exitName: 'Kakariko Village',
@@ -1753,36 +1934,42 @@ const connections = [{
   start: 87,
   end: 87,
   id: 291,
+  unique: true,
 }, {
   entranceName: 'Done Light Trial',
   exitName: 'Done Light Trial',
   start: 87,
   end: 87,
   id: 292,
+  unique: true,
 }, {
   entranceName: 'Done Fire Trial',
   exitName: 'Done Fire Trial',
   start: 87,
   end: 87,
   id: 293,
+  unique: true,
 }, {
   entranceName: 'Done Shadow Trial',
   exitName: 'Done Shadow Trial',
   start: 87,
   end: 87,
   id: 294,
+  unique: true,
 }, {
   entranceName: 'Done Water Trial',
   exitName: 'Done Water Trial',
   start: 87,
   end: 87,
   id: 295,
+  unique: true,
 }, {
   entranceName: 'Done Forest Trial',
   exitName: 'Done Forest Trial',
   start: 87,
   end: 87,
   id: 296,
+  unique: true,
 }, {
   entranceName: "Ganon's Castle Tower",
   exitName: "Ganon's Castle",
@@ -1801,6 +1988,10 @@ const connections = [{
   start: 89,
   end: 90,
   id: 299,
+  hard: {
+    child: true,
+    adult: true,
+  },
 }, {
   entranceName: 'Door at angle',
   exitName: 'Door',
@@ -2098,5 +2289,15 @@ const connections = [{
   start: false,
   end: 46,
   id: 348,
+}, {
+  entranceName: "Twinrova's Room",
+  exitName: 'Spirit Temple',
+  start: 86,
+  end: 78,
+  id: 348,
+  hard: {
+    adult: true,
+    child: true,
+  },
 }];
 export default connections;
